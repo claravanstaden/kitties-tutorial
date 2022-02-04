@@ -41,7 +41,7 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
 /// Import the kitties pallet.
-pub use pallet_template;
+pub use pallet_kitties;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -274,9 +274,17 @@ impl pallet_sudo::Config for Runtime {
 	type Call = Call;
 }
 
+parameter_types! {
+    // One can own at most 9,999 Kitties
+    pub const MaxKittyOwned: u32 = 9999;
+}
+
 /// Configure the pallet-kitties in pallets/kitties.
-impl pallet_template::Config for Runtime {
+impl pallet_kitties::Config for Runtime {
 	type Event = Event;
+	type Currency = Balances;
+	type KittyRandomness = RandomnessCollectiveFlip;
+	type MaxKittyOwned = MaxKittyOwned;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -295,7 +303,7 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-kitties in the runtime.
-		TemplateModule: pallet_template,
+		SubstrateKitties: pallet_kitties,
 	}
 );
 
@@ -474,7 +482,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-			list_benchmark!(list, extra, pallet_template, TemplateModule);
+			list_benchmark!(list, extra, pallet_kitties, TemplateModule);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -512,7 +520,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			add_benchmark!(params, batches, pallet_template, TemplateModule);
+			add_benchmark!(params, batches, pallet_kitties, TemplateModule);
 
 			Ok(batches)
 		}
